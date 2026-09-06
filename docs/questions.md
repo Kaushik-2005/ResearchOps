@@ -90,3 +90,12 @@
 - Correct explanation: End-to-end tool latency shows the user's experience, but dependency latency shows how much of that time was spent waiting on OpenAlex. If both are high, OpenAlex is likely slow. If tool latency is high while dependency latency is low, the server path needs investigation.
 - Revisit on: Day 14
 - Status: Understood
+## Question
+
+- Date: 2026-09-06
+- Related day: Day 14
+- Question: Why can stale `tools/list` metadata break an MCP client even when the server code is healthy?
+- Current understanding: Cached tool metadata can make the client call outdated names, schemas, permissions, or tool behavior.
+- Correct explanation: In MCP, discovered metadata is part of the client and model-facing contract. If a client caches stale metadata, it may send arguments that no longer validate, choose a capability for the wrong reason, assume permissions that changed, or miss a safer replacement capability. Server-side authorization must still enforce policy, but compatibility and cache TTLs reduce avoidable breakage.
+- Revisit on: Post-roadmap review
+- Status: Understood

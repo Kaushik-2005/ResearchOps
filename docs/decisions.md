@@ -191,3 +191,16 @@
 - Why: This gives concrete local observability and testable signal while keeping dependencies and deployment configuration small.
 - Trade-offs: Metrics are process-local and traces are no-op unless an OpenTelemetry SDK/exporter is configured later.
 - Consequences: The code now has stable observability boundaries that can later feed Prometheus, OTLP, or another backend without redesigning MCP handlers.
+## Decision: Package Tasks And Apps As Future Extensions For Final Release
+
+- Date: 2026-09-06
+- Status: Accepted
+- Context: Day 14 covers Tasks, MCP Apps, elicitation, extensions, compatibility, and final release packaging. The current ResearchOps server already has a complete synchronous MCP workflow but no operation that genuinely requires asynchronous task lifecycle management or interactive UI.
+- Options considered:
+  - Implement demo-only Tasks and Apps immediately.
+  - Skip advanced features entirely.
+  - Document the extension design and finish the release with stable core capabilities.
+- Decision: Keep the runtime MCP surface stable for the final release, document Tasks and Apps as future extensions, and focus Day 14 implementation on release checklist, demo script, compatibility policy, and known limitations.
+- Why: This avoids fake complexity and keeps the portfolio project honest. Tasks and Apps should solve real workflow needs, not exist only to check a box.
+- Trade-offs: The final release does not demonstrate every advanced MCP extension in code.
+- Consequences: The project is stronger as a production-style core MCP server, while future extension work has a clear design path.

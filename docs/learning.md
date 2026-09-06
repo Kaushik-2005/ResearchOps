@@ -1812,19 +1812,130 @@ Observability for an MCP server means collecting enough PII-safe telemetry to ex
 
 ### Day 14: Advanced Features and Final Release
 
+#### Learning objectives
 
+- Understand when MCP elicitation or multi-round-trip requests are appropriate.
+- Understand why long-running Tasks should be used for work that outlives a normal request-response cycle.
+- Understand MCP Apps and UI resources as a separate interactive surface with additional security risk.
+- Understand tool-list caching, compatibility, deprecation, and versioning as production contract concerns.
+- Package ResearchOps MCP as an honest portfolio-ready production candidate with clear limitations.
 
+#### Core concepts
 
+- Multi-round-trip requests let a client retry an original operation with additional input instead of relying on hidden server-initiated session state.
+- Tasks are for asynchronous work that needs a stable task ID, progress checks, cancellation or status, and later result retrieval.
+- MCP Apps expose interactive UI through MCP extensions; they are more powerful than plain JSON and need stronger frontend trust boundaries.
+- Tool-list caching reduces repeated discovery work, but stale metadata can cause clients to call old tool names, schemas, or permissions.
+- Compatibility strategy treats tool names, descriptions, schemas, resource templates, and prompt arguments as public contract.
+- A portfolio-ready release is not the same as a fully managed enterprise deployment; limitations must be explicit.
 
+#### How it works
 
+ResearchOps Day 14 does not add speculative advanced runtime features. Instead, it records how those features would fit:
 
+1. A future long literature scan could start as a Task, return a task ID, and allow the client to poll for status and results.
+2. A future missing-information flow could use the current stateless multi-round-trip model instead of assuming a persistent server-to-client channel.
+3. A future dashboard could be exposed through MCP Apps, but only after UI isolation, link handling, and data exposure rules are designed.
+4. Tool metadata remains protected by regression tests and evals because clients and models use it as operational behavior.
+5. The final release includes a checklist, demo script, security review, compatibility policy, known limitations, and verification commands.
 
+#### Example
 
+Bad fit for a normal tool call:
 
+- `run_literature_scan(topic="MCP security", max_papers=500)` blocks for several minutes and holds the client connection open.
 
+Better Task-shaped design:
 
+- `start_literature_scan(...)` returns `task_id="scan_123"`.
+- `tasks/get` or a task-status tool returns progress such as `running`, `completed`, or `failed`.
+- The result can later return a summary, saved reading-list URI, or export artifact.
 
+#### Role in our project
 
+Day 14 turns the working MCP server into a release artifact. The code already demonstrates tools, resources, prompts, local and remote transport, auth, security, reliability, evaluation, observability, and Docker packaging. The final day makes the project understandable to another engineer or reviewer.
 
+#### Why it is designed this way
 
+- Advanced MCP features should be added only when there is a concrete product need.
+- Tasks would add lifecycle state, polling, cancellation, and cleanup concerns; adding them without a real long-running operation would create fake complexity.
+- Apps would add active UI and frontend security concerns; adding them before the server contract is finalized would distract from the core MCP learning goal.
+- Compatibility documentation is necessary because MCP clients may cache and depend on discovered metadata.
 
+#### Alternatives and trade-offs
+
+- Implement Tasks now:
+  - more feature-complete
+  - would be mostly artificial because current operations finish within normal request windows
+- Implement MCP Apps now:
+  - more visual
+  - would add UI security and hosting complexity before there is a real interactive workflow
+- Keep release docs minimal:
+  - faster
+  - weaker portfolio story and less useful for future maintenance
+- Document limitations explicitly:
+  - exposes remaining gaps
+  - makes the project more credible and easier to evolve
+
+#### Failure modes
+
+- A slow operation implemented as one normal tool call can hit timeouts, hold resources, and fail without recoverable progress.
+- A breaking tool schema change can silently break clients that cached the old `tools/list` result.
+- UI resources can introduce unsafe links, rendering attacks, action confusion, or accidental data exposure.
+- A release can look more mature than it is if demo tokens, ephemeral storage, or process-local metrics are not documented as limitations.
+
+#### Common mistakes
+
+- Adding Tasks for ordinary fast operations.
+- Treating MCP Apps as only a nicer output format instead of an active UI security boundary.
+- Renaming tools or required arguments without a migration plan.
+- Calling a staging Docker deployment production-ready without durable storage, real OAuth, and external telemetry.
+- Forgetting that metadata changes can be behavioral regressions in MCP.
+
+#### Security considerations
+
+- Elicitation should not be used to collect secrets through ordinary form-style flows; sensitive credential workflows should go through explicit secure URLs or provider-controlled auth flows.
+- Task results need the same authorization checks as direct tool results because a task ID is not a capability token.
+- Apps need UI isolation, safe link handling, explicit action boundaries, and careful data minimization.
+- Tool-list caching must not let a client bypass current server-side authorization; authorization remains enforced on every request.
+- Compatibility and deprecation policy reduce the risk of clients using stale, unsafe, or misunderstood capabilities.
+
+#### Interview explanation
+
+Day 14 is about knowing when not to add advanced MCP features prematurely. Tasks are right for long-running workflows that need progress and later retrieval. Apps are right when the server needs to expose interactive UI, but they introduce frontend security boundaries. Tool-list caching and compatibility strategy matter because MCP metadata is a client and model-facing contract. ResearchOps is release-ready as a local/staging production candidate with clear future work for full OAuth, durable hosting, external telemetry, distributed controls, Tasks, and Apps.
+
+#### Questions for revision
+
+1. Why are Tasks better than one slow tool call for long-running work?
+   Answer: A Task can return an ID quickly, track progress, survive normal request timeouts, and let the client retrieve results later.
+
+2. Why does a production MCP server need a deprecation strategy?
+   Answer: Clients may depend on tool names, descriptions, schemas, and resource templates. Sudden changes can break integrations or model behavior.
+
+3. Why are MCP Apps riskier than plain JSON or text responses?
+   Answer: Apps introduce active UI, user interaction, rendering, links, and action boundaries, so the security surface is larger.
+
+4. What can go wrong with stale tool-list caching?
+   Answer: A client may call removed tools, send old arguments, assume old permissions, or misunderstand changed tool behavior.
+
+5. Why is ResearchOps described as a production candidate rather than a full enterprise production service?
+   Answer: It has strong local/staging engineering controls, but still uses demo auth, local SQLite staging storage, process-local metrics, and no external telemetry backend.
+
+#### Active recall review
+
+1. Question: Why did Day 14 not implement Tasks immediately?
+   Answer: The current operations complete within normal request windows, so adding Tasks now would create artificial lifecycle complexity instead of solving a real problem.
+
+2. Question: Why should an MCP server keep old capability contracts during a migration window?
+   Answer: Clients and models may cache and depend on existing metadata, so keeping old contracts temporarily prevents abrupt integration failures.
+
+3. Question: What is the main Day 14 release outcome?
+   Answer: A portfolio-ready ResearchOps MCP project with final docs, demo flow, security review, known limitations, compatibility policy, and passing verification gates.
+
+#### References
+
+- MCP specification latest: https://modelcontextprotocol.io/specification/latest
+- MCP 2026-07-28 release overview: https://blog.modelcontextprotocol.io/posts/2026-07-28/
+- MCP Apps overview: https://blog.modelcontextprotocol.io/posts/2026-01-26-mcp-apps/
+- MCP 2026-07-28 release candidate: https://blog.modelcontextprotocol.io/posts/2026-07-28-release-candidate/
+- OWASP MCP Security Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/MCP_Security_Cheat_Sheet.html

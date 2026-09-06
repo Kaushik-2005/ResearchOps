@@ -693,3 +693,51 @@ sequenceDiagram
 - OpenTelemetry uses API spans, but no SDK exporter or collector is configured yet.
 - `/metrics` currently returns JSON rather than Prometheus exposition format.
 - Readiness is lightweight and does not yet perform deep database or OpenAlex dependency probes.
+## Day 14: Final Release Packaging
+
+### What Changed
+
+Day 14 does not change the MCP runtime surface. It packages the completed project for review and release by adding final release documentation, a demo script, a compatibility policy, and an explicit list of known limitations.
+
+### Release Boundary
+
+The final release treats the current MCP surface as stable:
+
+- tool names and schemas remain unchanged
+- resource URI templates remain unchanged
+- prompt names and arguments remain unchanged
+- transport support remains `stdio` and Streamable HTTP
+- evaluation and metadata regression tests remain the guardrails for interface drift
+
+### Advanced Feature Position
+
+Tasks, Apps, and deeper extension work are intentionally documented rather than implemented in this release.
+
+This is a design choice. The current server does not yet have a genuine long-running operation that requires task lifecycle management, and it does not yet have an interactive workflow that justifies an MCP App UI. Adding either prematurely would increase complexity without improving the core ResearchOps MCP contract.
+
+### Final Release Artifacts
+
+- `docs/release-checklist.md`: final verification, security review, known limitations, and compatibility policy.
+- `docs/demo-script.md`: 3-5 minute walkthrough for a reviewer or portfolio demo.
+- `README.md`: final setup, testing, evaluation, deployment, observability, and release instructions.
+- `docs/evaluation-report.md`: current quality-gate summary.
+- `docs/threat-model.md`: security posture and remaining production gaps.
+
+### Future Architecture Extensions
+
+```mermaid
+flowchart TD
+    MCP[Current ResearchOps MCP Server] --> Tasks[Future Tasks Extension\nlong literature scans]
+    MCP --> Apps[Future MCP Apps UI\ninteractive dashboard]
+    MCP --> OAuth[Future Production OAuth\nexternal issuer]
+    MCP --> Telemetry[Future OTLP Export\ncollector and backend]
+    MCP --> Database[Future Managed Database\nPostgreSQL or hosted SQLite-compatible storage]
+```
+
+### Known Limitations After Day 14
+
+- Demo auth is useful for learning and tests, but not a production identity provider.
+- Staging storage is disposable unless a durable database is configured.
+- Metrics, rate limiting, and circuit breaking are process-local.
+- OpenTelemetry spans need an SDK exporter and collector to become distributed traces.
+- Tasks and Apps remain future extension work.

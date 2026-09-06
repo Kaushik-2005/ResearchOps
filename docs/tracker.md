@@ -4,8 +4,8 @@
 
 - Current module: Module 5 - Testing, Evaluation, and Production
 - Current day: Day 14 - advanced features and final release
-- Current task: Day 13 observability and scaling completed
-- Next milestone: Begin final release hardening and portfolio packaging
+- Current task: 14-day roadmap completed
+- Next milestone: Optional post-roadmap production upgrade
 - Active blockers: None
 
 ## Roadmap Progress
@@ -25,7 +25,7 @@
 | 11 | Testing and Production | Protocol and application testing | Completed | Automated tests and MCP Inspector report | `pytest tests/integration/test_protocol_workflows.py tests/unit/test_mcp_metadata_regression.py` passed with 6 tests; full `pytest` passed with 51 tests on 2026-09-02; `npx @modelcontextprotocol/inspector@latest --cli python src/server.py --method tools/list --format json` listed the expected 9-tool catalog | 4 |
 | 12 | Testing and Production | Model and tool-selection evaluation | Completed | Deterministic evaluation harness, 42-case dataset, JSON and Markdown reports, and regression workflow | `pytest tests/unit/test_eval_runner.py` passed with 5 tests; `python -m researchops_mcp.evals --fail-on-thresholds` passed on 2026-09-04; `docs/evaluation-report.json` recorded current metadata thresholds passing and generic descriptions degrading tool selection | 4 |
 | 13 | Testing and Production | Observability and scaling | Completed | Observable production candidate with structured logs, request IDs, per-operation metrics, dependency latency, health/readiness/metrics endpoints, OpenTelemetry API spans, and broader CI | `python -m compileall src tests` passed; `pytest` passed with 61 tests; `python -m researchops_mcp.evals --fail-on-thresholds` passed; `docker build -t researchops-mcp:day13 .` passed on 2026-09-05 | 4 |
-| 14 | Testing and Production | Advanced features and final release | Not Started | Portfolio-ready MCP project | — | — |
+| 14 | Testing and Production | Advanced features and final release | Completed | Portfolio-ready MCP project release docs, demo script, security review, compatibility policy, and final verification | `python -m compileall src tests`, `pytest` 61 passed, `python -m researchops_mcp.evals --fail-on-thresholds` passed with p95 latency 153 ms, and user-confirmed `docker build -t researchops-mcp:release .` completed on 2026-09-06 | 5 |
 
 ## Session Log
 
@@ -249,3 +249,13 @@
 - Decisions made: Keep `httpx` as a runtime dependency instead of a dev-only dependency because HTTP client mode is part of the shipped CLI
 - Topics to revisit: Consider a future clean-venv CI smoke test if dependency drift recurs
 - Next action: Continue Day 14 final release work
+### 2026-09-06 Day 14 Kickoff And Release Packaging
+
+- Topics studied: elicitation and multi-round-trip requests, long-running Tasks, MCP Apps/UI resources, extensions, tool-list caching, compatibility policy, deprecation strategy, and final release packaging
+- Work implemented: Added `docs/release-checklist.md` and `docs/demo-script.md`; updated README, learning notes, design docs, threat model, decisions, questions, and session handoff for Day 14 release posture
+- Tests executed: `python -m compileall src tests`; `pytest`; `python -m researchops_mcp.evals --fail-on-thresholds`; `docker build -t researchops-mcp:release .`
+- Results: Syntax verification passed; full suite passed with 61 tests; evaluation gate passed with p95 latency 153 ms under the 250 ms threshold; release Docker image build completed after Docker Desktop was started
+- Problems encountered: Docker Desktop Linux engine was initially unavailable, then the user started Docker and confirmed the release image build finished
+- Decisions made: Do not implement demo-only Tasks or MCP Apps; document them as future extensions because the current product does not yet have a genuine long-running workflow or UI workflow that justifies the added complexity
+- Topics to revisit: Choose a post-roadmap production upgrade such as real OAuth, durable storage, external telemetry, distributed controls, or a genuine Task workflow
+- Next action: Record a demo using `docs/demo-script.md` or start a post-roadmap production upgrade

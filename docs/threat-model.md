@@ -3,7 +3,7 @@
 ## Scope
 
 This started as the Day 1 threat-model outline for the ResearchOps MCP project.
-It has now been extended through Day 10 to reflect authenticated remote access, scoped authorization, trust labeling, outbound restrictions, request-size enforcement, rate limiting, and dependency-failure resilience.
+It has now been extended through Day 14 to reflect authenticated remote access, scoped authorization, trust labeling, outbound restrictions, request-size enforcement, rate limiting, dependency-failure resilience, observability controls, final release limitations, and future Tasks/Apps risks.
 
 ## Assets
 
@@ -153,3 +153,27 @@ It has now been extended through Day 10 to reflect authenticated remote access, 
 - How much user identity will be trusted from the host versus verified directly?
 - Which operations need human approval in the client versus strict denial in the server?
 - When the project becomes multi-instance, which shared store should back rate limiting, circuit breaking, and broader abuse controls?
+## Day 14 Final Release Security Position
+
+### Additional Risks Reviewed
+
+- Long-running Tasks would need authorization checks on task creation, task status, task result retrieval, and cancellation.
+- Task IDs must not become bearer secrets; ownership must still be checked server-side.
+- MCP Apps would introduce active UI rendering, links, user interaction, and frontend data-exposure risks beyond plain JSON/text results.
+- Tool-list caching can cause clients to act on stale metadata if capabilities are renamed or schemas change without a migration plan.
+- Public demo deployments can be mistaken for full production if demo auth, disposable storage, and process-local controls are not documented.
+
+### Final Release Mitigations
+
+- Tasks and Apps are not enabled in this release; they are documented as future extensions with explicit security concerns.
+- Compatibility policy treats MCP metadata as public contract and requires migration notes for breaking changes.
+- Known limitations are documented in `README.md` and `docs/release-checklist.md`.
+- Final verification includes syntax checks, full tests, evaluation threshold gate, and Docker image build.
+
+### Remaining Production Gaps
+
+- Replace demo bearer tokens with a real OAuth/OIDC provider.
+- Replace disposable staging storage with durable managed storage.
+- Move rate limiting and circuit-breaker state to shared infrastructure for multi-instance deployments.
+- Export OpenTelemetry spans and metrics to an external collector/backend.
+- Add deeper readiness checks for database and dependency health.
